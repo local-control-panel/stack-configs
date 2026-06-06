@@ -1,0 +1,32 @@
+# CORS headers for WordPress REST API — import inside site block
+# Compatible with FrankenPHP / Caddy
+#
+# Use case: headless WordPress with a separate frontend (Next.js, Nuxt, etc.)
+# Replace the allowed origin with your frontend domain.
+# For public APIs set Access-Control-Allow-Origin to "*".
+
+@wp_rest_preflight {
+    method OPTIONS
+    path /wp-json/*
+}
+
+@wp_rest_request {
+    not method OPTIONS
+    path /wp-json/*
+}
+
+handle @wp_rest_preflight {
+    header Access-Control-Allow-Origin "https://example.com"
+    header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization, X-WP-Nonce"
+    header Access-Control-Max-Age "86400"
+    header Vary "Origin"
+    respond 204
+}
+
+handle @wp_rest_request {
+    header Access-Control-Allow-Origin "https://example.com"
+    header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization, X-WP-Nonce"
+    header Vary "Origin"
+}

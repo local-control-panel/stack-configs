@@ -29,19 +29,46 @@
       "action": "block"
     },
     {
-      "id": "block-exploit-paths",
-      "name": "Block Common Exploit Paths",
-      "description": "Blocks requests to sensitive paths that should never be publicly accessible.",
-      "expression": "(http.request.uri.path in {\"/.env\" \"/.git\" \"/config.php\" \"/configuration.php\" \"/server-status\" \"/server-info\" \"/wp-config.php\" \"/wp-config.php.bak\"})",
+      "id": "block-bad-bots-extended",
+      "name": "Block Extended Bad Bots",
+      "description": "Broader list of known scanner, scraper, and exploit user-agents not covered by the base preset.",
+      "expression": "(http.user_agent contains \"WPScan\") or (http.user_agent contains \"nikto\") or (http.user_agent contains \"masscan\") or (http.user_agent contains \"Hydra\") or (http.user_agent contains \"dirbuster\") or (http.user_agent contains \"gobuster\") or (http.user_agent contains \"wfuzz\") or (http.user_agent contains \"acunetix\") or (http.user_agent contains \"nessus\") or (http.user_agent contains \"python-requests\") or (http.user_agent contains \"Go-http-client\")",
       "action": "block"
     },
     {
-      "id": "managed-waf-wordpress",
-      "name": "Cloudflare Managed WAF — WordPress Ruleset",
-      "description": "Enables Cloudflare's managed WordPress WAF ruleset (requires WAF entitlement).",
-      "managed": true,
-      "rulesetId": "efb7b8c949ac4650a09736fc376e9aee",
-      "action": "managed_challenge"
+      "id": "block-exploit-paths",
+      "name": "Block Common Exploit Paths",
+      "description": "Blocks requests to sensitive paths that should never be publicly accessible.",
+      "expression": "(http.request.uri.path in {\"/.env\" \"/.env.local\" \"/.env.prod\" \"/.git\" \"/config.php\" \"/configuration.php\" \"/server-status\" \"/server-info\" \"/wp-config.php\" \"/wp-config.php.bak\" \"/wp-config-sample.php\" \"/readme.html\" \"/license.txt\" \"/.htaccess\" \"/.htpasswd\"})",
+      "action": "block"
+    },
+    {
+      "id": "block-author-enum",
+      "name": "Block Author Enumeration",
+      "description": "Blocks ?author=N scans used to harvest WordPress usernames.",
+      "expression": "(http.request.uri.query contains \"author=\" and not http.request.uri.path contains \"/wp-admin\")",
+      "action": "block"
+    },
+    {
+      "id": "block-wp-cron-external",
+      "name": "Block External wp-cron.php",
+      "description": "Blocks public access to wp-cron.php — it should only be triggered by a server-side cron job.",
+      "expression": "(http.request.uri.path eq \"/wp-cron.php\")",
+      "action": "block"
+    },
+    {
+      "id": "challenge-rest-api",
+      "name": "JS Challenge on REST API",
+      "description": "Challenges unauthenticated requests to /wp-json/* — useful if you don't need a public REST API.",
+      "expression": "(http.request.uri.path matches \"^/wp-json/\") and (not http.request.headers[\"authorization\"][*] ne \"\")",
+      "action": "js_challenge"
+    },
+    {
+      "id": "block-hotlinking",
+      "name": "Block Image Hotlinking",
+      "description": "Blocks requests to images and media from external domains that are not your site. Update the hostname to match your domain.",
+      "expression": "(http.request.uri.path matches \"\\.(jpg|jpeg|png|gif|webp|svg|mp4|webm)$\") and (http.referer ne \"\") and (not http.referer contains \"yourdomain.com\")",
+      "action": "block"
     }
   ]
 }

@@ -1,17 +1,35 @@
-# Security rules — included in site Caddyfile blocks
-# Fetched by website-control-panel at deploy time
+# Security rules — import inside site block
+# Compatible with FrankenPHP / Caddy
 
-# Block xmlrpc.php (WordPress brute-force vector)
+# Block xmlrpc.php (brute-force / DDoS amplification vector)
 respond /xmlrpc.php 403
 
-# Block PHP execution in uploads directory
+# Block PHP execution in uploads directory (webshell prevention)
 @php_in_uploads path_regexp \/wp-content\/uploads\/.*\.php$
 respond @php_in_uploads 403
 
-# Block common exploit paths
-@exploit_paths path /.env /.git/* /config.php /configuration.php /server-status /server-info
+# Block sensitive and exploit paths
+@exploit_paths path /.env /.env.local /.env.prod /.git/* /config.php /configuration.php /server-status /server-info /wp-config.php /wp-config.php.bak /wp-config-sample.php /readme.html /license.txt /.htaccess /.htpasswd
 respond @exploit_paths 403
 
-# Block user-agents with no value (most scanners)
+# Block hidden files, backup files, and temp files
+@hidden_files path_regexp \/(\.(?!well-known))|~$|\.bak$|\.old$|\.orig$|\.sql$
+respond @hidden_files 403
+
+# Block user-agents with no value (most automated scanners)
 @empty_ua header User-Agent ""
 respond @empty_ua 403
+
+# Block WordPress cron from external access — use server-side cron instead
+@external_wp_cron {
+    path /wp-cron.php
+    not remote_ip 127.0.0.1 ::1
+}
+respond @external_wp_cron 403
+
+# Block WordPress author enumeration (?author=N)
+@author_enum {
+    not path /wp-admin/*
+    query author=*
+}
+respond @author_enum 403

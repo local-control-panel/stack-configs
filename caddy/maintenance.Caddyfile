@@ -1,0 +1,53 @@
+# Maintenance mode — import inside site block
+# Compatible with FrankenPHP / Caddy
+#
+# Toggle: set MAINTENANCE_MODE=1 in the container environment, then run:
+#   docker exec <caddy-container> caddy reload --config /etc/caddy/Caddyfile
+#
+# Admin IPs in the `not remote_ip` list bypass the maintenance page.
+# Add your office/home IP to allow admin access during maintenance.
+
+@in_maintenance {
+    not remote_ip 127.0.0.1 ::1
+    expression `{env.MAINTENANCE_MODE} == "1"`
+}
+
+handle @in_maintenance {
+    header Content-Type "text/html; charset=utf-8"
+    header Cache-Control "no-store"
+    respond `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maintenance</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      text-align: center;
+      background: #fff;
+      border-radius: 12px;
+      padding: 3rem 4rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,.08);
+      max-width: 420px;
+    }
+    h1 { font-size: 1.6rem; color: #212529; margin-bottom: .6rem }
+    p  { color: #6c757d; line-height: 1.6 }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Down for maintenance</h1>
+    <p>We&rsquo;re doing some updates and will be back shortly.</p>
+  </div>
+</body>
+</html>` 503
+}

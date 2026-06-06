@@ -1,0 +1,27 @@
+# Security response headers — import inside site block
+# Compatible with FrankenPHP / Caddy
+
+header {
+    # HSTS — 1 year, force HTTPS on all subdomains
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Prevent clickjacking
+    X-Frame-Options "SAMEORIGIN"
+
+    # Prevent MIME-type sniffing
+    X-Content-Type-Options "nosniff"
+
+    # Referrer policy — send origin only on cross-site requests
+    Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Disable unused browser features
+    Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+    # Minimal CSP — blocks inline scripts and restricts sources
+    # Adjust script-src if you use inline scripts or external CDNs
+    Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-ancestors 'self'"
+
+    # Remove server fingerprint headers (FrankenPHP sends these by default)
+    -X-Powered-By
+    -Server
+}
