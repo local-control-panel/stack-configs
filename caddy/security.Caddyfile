@@ -1,0 +1,17 @@
+# Security rules — included in site Caddyfile blocks
+# Fetched by website-control-panel at deploy time
+
+# Block xmlrpc.php (WordPress brute-force vector)
+respond /xmlrpc.php 403
+
+# Block PHP execution in uploads directory
+@php_in_uploads path_regexp \/wp-content\/uploads\/.*\.php$
+respond @php_in_uploads 403
+
+# Block common exploit paths
+@exploit_paths path /.env /.git/* /config.php /configuration.php /server-status /server-info
+respond @exploit_paths 403
+
+# Block user-agents with no value (most scanners)
+@empty_ua header User-Agent ""
+respond @empty_ua 403

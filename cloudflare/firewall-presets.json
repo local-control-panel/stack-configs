@@ -1,0 +1,47 @@
+{
+  "presets": [
+    {
+      "id": "block-xmlrpc",
+      "name": "Block XML-RPC",
+      "description": "Blocks all requests to xmlrpc.php — common brute-force and DDoS amplification vector.",
+      "expression": "(http.request.uri.path eq \"/xmlrpc.php\")",
+      "action": "block"
+    },
+    {
+      "id": "block-php-uploads",
+      "name": "Block PHP in Uploads",
+      "description": "Blocks requests to PHP files inside wp-content/uploads — prevents webshell execution.",
+      "expression": "(http.request.uri.path matches \"^/wp-content/uploads/.*\\.php$\")",
+      "action": "block"
+    },
+    {
+      "id": "challenge-wp-login",
+      "name": "JS Challenge on wp-login.php",
+      "description": "Serves a JavaScript challenge on the login page to filter bots.",
+      "expression": "(http.request.uri.path eq \"/wp-login.php\")",
+      "action": "js_challenge"
+    },
+    {
+      "id": "block-bad-bots",
+      "name": "Block Known Bad Bots",
+      "description": "Blocks common scanner and exploit user-agents.",
+      "expression": "(http.user_agent contains \"Nuclei\") or (http.user_agent contains \"sqlmap\") or (http.user_agent contains \"Nmap\") or (http.user_agent contains \"zgrab\") or (http.user_agent eq \"\")",
+      "action": "block"
+    },
+    {
+      "id": "block-exploit-paths",
+      "name": "Block Common Exploit Paths",
+      "description": "Blocks requests to sensitive paths that should never be publicly accessible.",
+      "expression": "(http.request.uri.path in {\"/.env\" \"/.git\" \"/config.php\" \"/configuration.php\" \"/server-status\" \"/server-info\" \"/wp-config.php\" \"/wp-config.php.bak\"})",
+      "action": "block"
+    },
+    {
+      "id": "managed-waf-wordpress",
+      "name": "Cloudflare Managed WAF — WordPress Ruleset",
+      "description": "Enables Cloudflare's managed WordPress WAF ruleset (requires WAF entitlement).",
+      "managed": true,
+      "rulesetId": "efb7b8c949ac4650a09736fc376e9aee",
+      "action": "managed_challenge"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "caddy": {
+    "security": "caddy/security.Caddyfile",
+    "rateLimit": "caddy/rate-limit.Caddyfile"
+  },
+  "cloudflare": {
+    "presets": "cloudflare/firewall-presets.json"
+  }
+}

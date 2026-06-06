@@ -1,0 +1,17 @@
+# Rate limiting rules — requires caddy-ratelimit module
+# https://github.com/mholt/caddy-ratelimit
+
+# WordPress login — strict limit to slow brute-force
+@wp_login path /wp-login.php
+rate_limit @wp_login 5r/m
+
+# WordPress admin AJAX — moderate limit
+@wp_ajax path /wp-admin/admin-ajax.php
+rate_limit @wp_ajax 60r/m
+
+# REST API — generous but bounded
+@wp_rest path /wp-json/*
+rate_limit @wp_rest 120r/m
+
+# General — catch-all per IP
+rate_limit {remote_host} 300r/m
